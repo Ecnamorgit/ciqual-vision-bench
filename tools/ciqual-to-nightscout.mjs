@@ -54,18 +54,29 @@ const FILTER_PATH = val("filter");
 const DRY_RUN = flag("dry-run");
 const LIMIT = parseInt(val("limit", "500"), 10);
 const TOKEN = val("token");
+const SEARCH = val("search");
+const MODE = val("mode");
 
 const NS_BASE_URL = (process.env.NS_BASE_URL || "").replace(/\/$/, "");
 const NS_API_SECRET = process.env.NS_API_SECRET;
 
 if (!CSV_PATH) fail("--csv est requis");
-if (!DRY_RUN && !NS_BASE_URL) fail("NS_BASE_URL est requis (ou utilise --dry-run)");
-if (!DRY_RUN && !NS_API_SECRET && !TOKEN) fail("NS_API_SECRET ou --token est requis");
+const OFFLINE = DRY_RUN || SEARCH;
+if (!OFFLINE && !NS_BASE_URL) fail("NS_BASE_URL est requis (ou utilise --dry-run / --search)");
+if (!OFFLINE && !NS_API_SECRET && !TOKEN) fail("NS_API_SECRET ou --token est requis");
 
 function fail(msg) {
   console.error(`✗ ${msg}`);
   process.exit(1);
 }
+
+/**
+ * Minuscules, sans accents, ponctuation réduite à des espaces.
+ * "pates" matche "pâtes", "petit-suisse" matche "petit suisse".
+ */
+const norm = (s) =>
+  (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ").trim();
 
 // ---------------------------------------------------------------------------
 // Parsing CSV (séparateur ;, guillemets possibles)
@@ -97,7 +108,9 @@ function parseCsv(text) {
 /**
  * Ciqual utilise la virgule décimale et des marqueurs non numériques :
  * "traces", "-", "NC" (non communiqué), "< 0,5".
- * traces / < X  -> 0 ; NC / "-" -> null (donnée absente, on rejette la ligne si c'est les glucides)
+ *   traces  -> 0
+ *   "< 0,5" -> 0.5 (on garde la borne haute)
+ *   "-", NC -> null (donnée absente ; la ligne est rejetée si c'est les glucides)
  */
 function parseCiqualNumber(raw) {
   if (raw == null) return null;
@@ -160,18 +173,49 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const rows = parseCsv(readFileSync(CSV_PATH, "utf8"));
 console.log(`→ ${rows.length} lignes lues depuis ${CSV_PATH}`);
 
-const missing = Object.entries(COLS).filter(([, c]) => !(c in (rows[0] || {})));
+/**
+ * L'en-tête Ciqual contient des retours à la ligne à l'intérieur des cellules :
+ * "Glucides\n(g\n100 g)" au lieu de "Glucides (g/100 g)".
+ * On compare donc sur une clé réduite aux caractères alphanumériques,
+ * ce qui neutralise espaces, sauts de ligne, slashes, accents et ponctuation.
+ */
+const keyOf = (s) =>
+  (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase().replace(/[^a-z0-9]/g, "");
+
+const headerIndex = new Map(
+  Object.keys(rows[0] || {}).map((h) => [keyOf(h), h])
+);
+
+const RESOLVED = {};
+const missing = [];
+for (const [logical, wanted] of Object.entries(COLS)) {
+  const actual = headerIndex.get(keyOf(wanted));
+  if (actual) RESOLVED[logical] = actual;
+  else missing.push([logical, wanted]);
+}
+
 if (missing.length) {
-  console.error("✗ Colonnes introuvables :", missing.map(([k, c]) => `${k} → "${c}"`).join(", "));
-  console.error("  En-tête réel :", Object.keys(rows[0] || {}).join(" | "));
+  console.error("✗ Colonnes introuvables :");
+  for (const [k, c] of missing) console.error(`    ${k} → "${c}"`);
+  console.error("\n  En-tête réel (retours à la ligne remplacés par ⏎) :");
+  for (const h of Object.keys(rows[0] || {})) {
+    console.error(`    "${h.replace(/\n/g, "⏎")}"`);
+  }
   process.exit(1);
+}
+
+console.log("→ Colonnes résolues :");
+for (const [k, h] of Object.entries(RESOLVED)) {
+  console.log(`    ${k.padEnd(10)} → "${h.replace(/\n/g, "⏎")}"`);
 }
 
 let filter = null;
 if (FILTER_PATH) {
   filter = readFileSync(FILTER_PATH, "utf8")
-    .split("\n").map((l) => l.trim().toLowerCase())
-    .filter((l) => l && !l.startsWith("#"));
+    .split("\n")
+    .map((l) => norm(l.split("#")[0].trim())) // tout ce qui suit # est un commentaire
+    .filter(Boolean);
   console.log(`→ ${filter.length} critères de filtre chargés`);
 }
 
@@ -179,33 +223,89 @@ const entries = [];
 let rejected = 0;
 
 for (const row of rows) {
-  const name = row[COLS.name];
-  const code = row[COLS.code];
+  const name = row[RESOLVED.name];
+  const code = row[RESOLVED.code];
   if (!name) continue;
 
   if (filter) {
-    const hay = `${code} ${name}`.toLowerCase();
-    if (!filter.some((f) => hay.includes(f))) continue;
+    // Une ligne purement numérique = code Ciqual exact (pas de sous-chaîne).
+    const hit = filter.some((f) =>
+      /^[0-9]+$/.test(f) ? code === f : norm(name).includes(f)
+    );
+    if (!hit) continue;
   }
 
-  const carbs = parseCiqualNumber(row[COLS.carbs]);
+  const carbs = parseCiqualNumber(row[RESOLVED.carbs]);
   if (carbs === null) { rejected++; continue; } // pas de glucides = inutilisable
 
   entries.push({
     code,
     name: name.slice(0, 60),
-    category: row[COLS.group] || "Ciqual",
-    subcategory: row[COLS.subgroup] || "",
+    category: row[RESOLVED.group] || "Ciqual",
+    subcategory: row[RESOLVED.subgroup] || "",
     portion: PORTION,
     unit: UNIT,
     carbs,
-    protein: parseCiqualNumber(row[COLS.protein]),
-    fat: parseCiqualNumber(row[COLS.fat]),
-    energy: parseCiqualNumber(row[COLS.energy]),
+    protein: parseCiqualNumber(row[RESOLVED.protein]),
+    fat: parseCiqualNumber(row[RESOLVED.fat]),
+    energy: parseCiqualNumber(row[RESOLVED.energy]),
   });
 }
 
 console.log(`→ ${entries.length} aliments retenus (${rejected} rejetés : glucides non renseignés)`);
+
+// ---------------------------------------------------------------------------
+// --mode cuit|cru : élimine le doublon dangereux.
+//
+// PRUDENCE VOLONTAIRE : on n'automatise que le cas non ambigu (cru/crue).
+// Les mentions "sec", "sèche", "déshydraté", "farine" ne sont PAS filtrées
+// automatiquement, parce que "abricot sec" est un aliment à part entière
+// alors que "pois chiche sec" est juste la forme non cuite. Impossible de
+// trancher par regex sans se tromper — donc on te les signale, tu décides.
+// ---------------------------------------------------------------------------
+if (MODE) {
+  if (!["cuit", "cru"].includes(MODE)) fail(`--mode doit valoir "cuit" ou "cru"`);
+
+  const COOKED = /\b(cuit|cuite|cuits|cuites|bouilli|bouillie|roti|rotie|grille|grillee|vapeur|four|friteuse|poele|appertise|appertisee)\b/;
+  const RAW = /\b(cru|crue|crus|crues)\b/;
+
+  const before = entries.length;
+  const kept = entries.filter((e) => {
+    const n = norm(e.name);
+    const isCooked = COOKED.test(n);
+    const isRaw = RAW.test(n);
+    if (!isCooked && !isRaw) return true;        // ni l'un ni l'autre : on garde
+    return MODE === "cuit" ? !(isRaw && !isCooked) : !(isCooked && !isRaw);
+  });
+  entries.length = 0;
+  entries.push(...kept);
+  console.log(`→ mode "${MODE}" : ${before - entries.length} entrées écartées`);
+
+  const AMBIGUOUS = /\b(sec|seche|seches|sechee|sechees|deshydrate|deshydratee|farine|precuite|poudre)\b/;
+  const flagged = entries.filter((e) => AMBIGUOUS.test(norm(e.name)));
+  if (flagged.length) {
+    console.log(`\n⚠  ${flagged.length} entrées à trancher toi-même (forme sèche/déshydratée) :`);
+    for (const e of flagged) console.log(`    ${e.code.padStart(6)}  ${e.carbs}g  ${e.name}`);
+    console.log("   Garde-les si tu les manges telles quelles (fruits secs),");
+    console.log("   supprime-les si c'est la forme avant cuisson (légumineuses, pâtes).");
+  }
+}
+
+// --search : explorer la table pour construire aliments.txt à partir des vrais noms.
+if (SEARCH) {
+  const q = norm(SEARCH);
+  const hits = entries.filter((e) => norm(e.name).includes(q))
+    .sort((a, b) => a.name.length - b.name.length);
+  console.log(`\n--- RECHERCHE "${SEARCH}" : ${hits.length} résultats ---`);
+  for (const e of hits.slice(0, 40)) {
+    console.log(
+      `${e.code.padStart(6)}  ${String(e.carbs).padStart(5)}g  ${e.name}`
+    );
+  }
+  if (hits.length > 40) console.log(`... et ${hits.length - 40} autres`);
+  console.log("\n→ Copie les codes qui t'intéressent dans aliments.txt (un par ligne).");
+  process.exit(0);
+}
 
 if (entries.length > LIMIT) {
   fail(

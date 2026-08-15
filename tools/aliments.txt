@@ -1,0 +1,197 @@
+# aliments.txt — codes Ciqual 2025 (généré depuis la table réelle)
+#
+# Format : <code Ciqual>  # nom — glucides pour 100 g
+# Une ligne purement numérique = code exact. Tout ce qui suit # est ignoré.
+# Tu peux aussi mettre un fragment de nom, mais les codes sont plus sûrs.
+#
+#
+# ⚠️  TABLE EN MODE "CUIT" — toutes les formes crues ont été retirées.
+#     Les 8 mentions "sec/sèche" restantes sont volontaires et vérifiées :
+#       - Abricot sec, Datte sèche  -> aliments consommés tels quels
+#       - "Pâtes sèches ... CUITES" -> c'est bien la ligne cuite, le "sèches"
+#         décrit le type de pâtes, pas leur état. Ne la supprime pas.
+#       - Pain complet (farine T150), Biscuits secs -> produits finis
+#
+#     ⚠️  EXCEPTION À SURVEILLER : les flocons d'avoine.
+#     Seule la version cuite (bouillie, 10,3g) est présente, cohérente avec
+#     une pesée dans l'assiette. Si tu fais du muesli ou des overnight oats,
+#     tu pèses les flocons SECS -> il te faut le code 32140 (57,7g).
+#     Ne mets jamais les deux : rapport x5,6.
+#
+#     Si tu pèses au paquet AVANT cuisson plutôt que dans l'assiette,
+#     ne modifie pas ce fichier : relance avec --mode cru pour régénérer.
+#
+# Pour explorer :  node ciqual-to-nightscout.mjs --csv ciqual.csv --search "yaourt"
+
+# ═══ FÉCULENTS ═══
+9124  # Riz thaï, cuit, sans sel ajouté — 31,4g
+9104  # Riz blanc, cuit, sans sel ajouté — 33,2g
+9110  # Riz rouge, cuit, sans sel ajouté — 28,2g
+9103  # Riz complet, cuit, sans sel ajouté — 37,6g
+9811  # Pâtes sèches, standard, cuites, sans sel ajouté — 31,4g
+9822  # Pâtes sèches, aux oeufs, cuites, sans sel ajouté — 23g
+9816  # Pâtes fraîches, aux oeufs, cuites, sans sel ajouté — 32g
+9824  # Pâtes sèches, sans gluten, cuites, sans sel ajouté — 34,4g
+9615  # Polenta ou semoule de maïs, cuite, sans sel ajouté — 16,9g
+9691  # Boulgour de blé, cuit, sans sel ajouté — 24,1g
+9341  # Quinoa, bouilli/cuit à l'eau, sans sel ajouté — 27,9g
+20587  # Lentille verte, bouillie/cuite à l'eau — 16,2g
+20588  # Lentille blonde, bouillie/cuite à l'eau — 16,3g
+20511  # Haricot blanc, appertisé, égoutté — 10,9g
+9313  # Flocons d'avoine bouillis/cuits à l'eau — 10,3g
+4014  # Pomme de terre vapeur, sous vide — 15,8g
+4026  # Pomme de terre, rôtie/cuite au four — 19g
+4048  # Pomme de terre, cuite (aliment moyen) — 17,2g
+4003  # Pomme de terre, bouillie/cuite à l'eau — 16,8g
+4102  # Patate douce, cuite — 16,3g
+4032  # Frites de pommes de terre, surgelées, cuites en friteuse — 32,7g
+4030  # Frites de pommes de terre, surgelées, rôties/cuites au fou — 32,6g
+4047  # Purée de pomme de terre (aliment moyen) — 13g
+4040  # Purée de pomme de terre, avec lait et beurre, salée — 11,3g
+20502  # Haricot blanc, bouilli/cuit à l'eau — 12g
+20507  # Pois chiche, bouilli/cuit à l'eau — 17,7g
+20532  # Pois chiche, appertisé, égoutté — 15g
+20503  # Haricot rouge, bouilli/cuit à l'eau — 12,3g
+20524  # Haricot rouge, appertisé, égoutté — 13g
+
+# ═══ PAINS ═══
+7200  # Pain de mie blanc, préemballé — 50,4g
+7111  # Pain de mie complet, préemballé — 41,8g
+7210  # Pain de mie brioché, préemballé — 51,4g
+7106  # Pain complet au seigle, préemballé — 39,5g
+7110  # Pain complet ou intégral (à la farine T150) — 41,2g
+25536  # Sandwich baguette, salami beurre — 33,9g
+25543  # Sandwich baguette (aliment moyen) — 33,2g
+25519  # Sandwich baguette, pâté cornichons — 33,5g
+25488  # Sandwich baguette, saumon fumé beurre — 41,7g
+7255  # Pain aux céréales et/ou graines — 46,9g
+7425  # Pain grillé aux céréales, tranches, préemballé — 70g
+7301  # Biscotte briochée — 72,1g
+7300  # Biscotte classique — 73,2g
+7615  # Croissant ordinaire, artisanal — 47,6g
+7616  # Croissant ordinaire, préemballé — 46,7g
+7730  # Pain au chocolat, artisanal — 45,4g
+30707  # Saucisson brioché, cuit — 20,9g
+7742  # Brioche nature, artisanale — 50,7g
+25647  # Wrap poulet crudités — 23,6g
+25648  # Wrap jambon crudités — 25,2g
+7125  # Pain de seigle et froment — 51,5g
+
+# ═══ PETIT-DÉJEUNER ═══
+32003  # Céréales pour petit déjeuner (aliment moyen) — 73,2g
+32004  # Muesli (aliment moyen) — 63,4g
+32139  # Muesli enrichi en vitamines et minéraux (aliment moyen) — 63,6g
+32141  # Muesli non enrichi en vitamines et minéraux (aliment moyen — 61,8g
+31040  # Confiture de lait — 61,7g
+31047  # Gélifiant pour confitures — 62g
+31008  # Miel — 82,1g
+31032  # Pâte à tartiner chocolat et noisette — 57,9g
+23821  # Crêpe fourrée au chocolat ou à la pâte à tartiner chocolat — 54,3g
+24035  # Biscuit sec pour petit déjeuner, allégé en sucres — 66,2g
+
+# ═══ LAITAGES ═══
+19041  # Lait demi-écrémé, UHT — 5g
+19042  # Lait demi-écrémé, pasteurisé — 4,9g
+19023  # Lait entier, UHT — 4,77g
+19860  # Yaourt à la grecque nature — 3,73g
+19593  # Yaourt ou lait fermenté, nature — 4,26g
+19556  # Yaourt au lait de chèvre, nature — 2,53g
+19587  # Yaourt ou lait fermenté, aux fruits, sucré — 12,6g
+19727  # Yaourt au lait de chèvre, aux fruits, sucré — 11,6g
+19552  # Yaourt à la grecque sur lit de fruits, sucré — 14,4g
+19644  # Fromage blanc, nature, 0% MG — 4,22g
+19646  # Fromage blanc, nature, 2-3% MG — 3,86g
+19711  # Fromage blanc, nature, 7-8% MG — 5,87g
+19663  # Fromage frais type petit suisse, nature, 0% MG — 4,2g
+19664  # Fromage frais type petit suisse, nature, 4% MG environ — 3,11g
+39246  # Crème dessert au café, rayon frais — 17,3g
+39247  # Crème dessert au caramel, rayon frais — 18,1g
+13038  # Compote de pomme, préemballée — 25,8g
+13204  # Compote de pêche, préemballée — 24,9g
+13205  # Compote d'abricot, préemballée — 24,1g
+
+# ═══ FRUITS ═══
+2034  # Jus de clémentine ou mandarine, pur jus — 10,4g
+13011  # Datte, chair et peau, sans noyau, sèche — 64,7g
+13001  # Abricot, dénoyauté, sec — 59,1g
+2018  # Jus de pruneau — 18,7g
+
+# ═══ LÉGUMES ═══
+20037  # Petits pois, cuits — 4,7g
+
+# ═══ PROTÉINES ═══
+36018  # Poulet, filet sans peau grillé/poêlé — 0g
+36041  # Poulet, filet sans peau grillé/poêlé, bio — 0g
+36006  # Poulet, cuisse, viande rôtie/cuite au four — 0g
+6104  # Boeuf, gîte à la noix cuit — 0,2g
+6205  # Boeuf, onglet grillé/poêlé — 0g
+6131  # Boeuf, hampe grillée/poêlée — 0g
+28301  # Porc, rôti cuit — 0,65g
+28105  # Porc, carré cuit — 0,6g
+36302  # Dinde, viande rôtie/cuite au four — 0g
+36308  # Dinde, escalope rôtie/cuite au four — 0g
+22010  # Oeuf dur — 0,52g
+22008  # Oeuf, blanc (blanc d'oeuf), cuit — 1,12g
+22009  # Oeuf, jaune (jaune d'oeuf), cuit — 1,31g
+26037  # Saumon fumé — 0,13g
+26695  # Saumon, sauvage, fumé — 0,048g
+26041  # Thon, rôti/cuit au four — tracesg
+26039  # Thon, au naturel, appertisé, égoutté — 0g
+20912  # Tofu fumé, préemballé — 2,91g
+20904  # Tofu nature, préemballé — 2,87g
+28960  # Jambonneau, cuit — 5,43g
+28803  # Jambon cuit, fumé — 0,79g
+
+# ═══ PLATS COMPOSÉS ═══
+25516  # Pizza (aliment moyen) — 27,4g
+26271  # Pizza kebab, préemballée — 26,6g
+26270  # Pizza au thon, préemballée — 23,7g
+25464  # Pizza au saumon, préemballée — 26g
+25139  # Lasagnes ou cannellonis au poisson, préemballées — 13g
+25131  # Lasagnes ou cannellonis aux légumes, préemballées, cuits — 10,1g
+25413  # Hamburger, de restauration rapide — 29,5g
+25522  # Sandwich (aliment moyen) — 30,3g
+25501  # Sandwich panini, trois fromages — 25g
+25405  # Quiche lorraine, préemballée — 21,5g
+25573  # Tarte ou quiche salée (aliment moyen) — 24,3g
+25056  # Gratin dauphinois, préemballé — 14,5g
+25029  # Couscous au mouton — 12,2g
+25138  # Couscous au poulet — 15,6g
+25031  # Paëlla, préemballée — 17,1g
+25456  # Sushi ou maki aux produits de la mer — 26,9g
+25108  # Samossa ou samoussa ou brick garni, préemballé, cuit — 16,5g
+25009  # Hachis parmentier à la viande, préemballé — 9,39g
+25547  # Croque-monsieur, préemballé — 26,1g
+
+# ═══ SUCRÉ / RESUCRAGE ═══
+31016  # Sucre blanc — 99,7g
+2013  # Jus d'orange, frais — 9,19g
+2070  # Jus d'orange, pur jus — 9,61g
+2074  # Jus de pomme, pur jus — 11,4g
+2014  # Jus de pomme, à base de concentré — 11,3g
+19118  # Boisson lactée aromatisée au chocolat, sucrée, au lait par — 11g
+19119  # Boisson lactée aromatisée au chocolat, sucrée, au lait par — 10,8g
+31004  # Chocolat au lait, tablette — 58,9g
+31098  # Barre chocolat au lait avec nougat — 60,5g
+31080  # Chocolat noir fourré praliné, tablette — 52,4g
+31072  # Chocolat noir fourrage confiseur à la menthe — 70,2g
+31023  # Marron glacé — 77,5g
+39529  # Nougat glacé — 26,4g
+24370  # Crêpe dentelle nature — 73,1g
+23830  # Crêpe fourrée fraise, préemballée — 64,3g
+24313  # Gaufrette, fourrée vanille — 60,1g
+31097  # Bonbon tendre — 84,3g
+31060  # Bonbon gélifié — 76,9g
+24036  # Biscuit sec au chocolat, non enrichi — 59,5g
+23000  # Gâteau (aliment moyen) — 51,8g
+23803  # Gâteau basque aux cerises — 63,3g
+
+# ═══ DIVERS ═══
+17270  # Huile d'olive vierge extra — tracesg
+11054  # Mayonnaise (70% MG min.), préemballée — 3,41g
+11008  # Ketchup, préemballé — 23,7g
+25525  # Sauce tomate cuisinée pour pizza — 4,71g
+11178  # Sauce tomate aux olives, préemballée — 7,5g
+15042  # Amande, grillée, salée — 12,2g
+15002  # Cacahuète, grillée, salée — 14,2g
+25621  # Houmous, préemballé — 9g

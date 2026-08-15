@@ -1,0 +1,68 @@
+# ═══════════════════════════════════════════════════════════════════
+# SECRETS ET DONNÉES DE SANTÉ — ne jamais commiter
+#
+# Ce dépôt est public. Tout ce qui passe ici est irrécupérable :
+# supprimer un fichier dans un commit ultérieur ne l'efface PAS de
+# l'historique Git, et GitHub garde les commits orphelins accessibles
+# par leur SHA. Si tu commites une clé, révoque-la, ne te contente pas
+# de la supprimer.
+# ═══════════════════════════════════════════════════════════════════
+
+# Clés d'API
+.env
+.env.*
+!.env.example
+*.key
+secrets.json
+lib/secrets.dart
+
+# URL et jetons Nightscout — ton instance est nominative,
+# ne la laisse pas fuiter dans un fichier de config d'exemple
+nightscout.json
+**/ns_config.dart
+
+# Données de santé personnelles : photos de repas, base de mesures,
+# exports CSV. Ce sont des données de l'article 9 du RGPD.
+data/
+photos/
+*.db
+*.sqlite
+*.sqlite3
+mesures*.csv
+export*.csv
+
+# ═══════════════════════════════════════════════════════════════════
+# Flutter / Dart
+# ═══════════════════════════════════════════════════════════════════
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.vscode/
+**/doc/api/
+
+# Android
+android/.gradle/
+android/local.properties
+android/key.properties
+*.jks
+*.keystore
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Generated.xcconfig
+
+# ═══════════════════════════════════════════════════════════════════
+# Divers
+# ═══════════════════════════════════════════════════════════════════
+.DS_Store
+Thumbs.db
+*.log
+node_modules/
